@@ -4,6 +4,7 @@ module.exports = function (grunt) {
     var buildDir = 'build';
     var srcDir = 'src';
     var mainAppFile = 'app.js';
+    var webpack = require('webpack');
 
     require('time-grunt')(grunt);
     require('load-grunt-tasks')(grunt);
@@ -28,7 +29,7 @@ module.exports = function (grunt) {
         },
 
         babel: {
-            'transform': {
+            'dev': {
                 options: {
                     sourceMap: true,
                     presets: ['react'],
@@ -46,27 +47,51 @@ module.exports = function (grunt) {
                         dest: buildDir + '/'
                     }
                 ]
+            },
+            'prod': {
+                options: {
+                    sourceMap: false,
+                    presets: ['react'],
+                    // uglify2JS doesn't support es6
+                    plugins: [
+                        'transform-es2015-modules-commonjs',
+                        'transform-es2015-template-literals'
+                    ],
+                    ast: false
+                },
+                files: [
+                    {
+                        expand: true,
+                        filter: 'isFile',
+                        cwd: 'src/',
+                        src: ['**/*.js*'],
+                        dest: buildDir + '/'
+                    }
+                ]
             }
         },
 
         webpack: {
             options: require('./webpack.config.js'),
             dev: {
-                // plugins: webpackConfig.plugins.concat(
-                //     new webpack.DefinePlugin({
-                //         "process.env": {
-                //             // This has effect on the react lib size
-                //             "NODE_ENV": JSON.stringify("production")
-                //         }
-                //     }),
-                //     new webpack.optimize.DedupePlugin(),
-                //     new webpack.optimize.UglifyJsPlugin()
-                // )
                 devtool: "sourcemap",
                 debug: true
+            },
+            prod: {
+                plugins: [
+                    new webpack.DefinePlugin({
+                        "process.env": {
+                            // This has effect on the react lib size
+                            "NODE_ENV": JSON.stringify("production")
+                        }
+                    }),
+                    new webpack.optimize.DedupePlugin(),
+                    new webpack.optimize.UglifyJsPlugin()
+                ]
             }
         }
     });
 
-    grunt.registerTask('build', ['clean', 'copy:index2Build', 'babel:transform', 'webpack:dev']);
+    grunt.registerTask('build', ['clean', 'copy:index2Build', 'babel:dev', 'webpack:dev']);
+    grunt.registerTask('prod', ['clean', 'copy:index2Build', 'babel:prod', 'webpack:prod']);
 };
