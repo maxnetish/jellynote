@@ -5,6 +5,8 @@ module.exports = function (grunt) {
     var srcDir = 'src';
     var mainAppFile = 'app.js';
     var webpack = require('webpack');
+    var webpackCommonOptions =  require('./webpack.config.js');
+    var path = require('path');
 
     require('time-grunt')(grunt);
     require('load-grunt-tasks')(grunt);
@@ -72,13 +74,13 @@ module.exports = function (grunt) {
         },
 
         webpack: {
-            options: require('./webpack.config.js'),
+            options: webpackCommonOptions,
             dev: {
                 devtool: "sourcemap",
                 debug: true
             },
             prod: {
-                plugins: [
+                plugins: webpackCommonOptions.plugins.concat([
                     new webpack.DefinePlugin({
                         "process.env": {
                             // This has effect on the react lib size
@@ -87,11 +89,48 @@ module.exports = function (grunt) {
                     }),
                     new webpack.optimize.DedupePlugin(),
                     new webpack.optimize.UglifyJsPlugin()
-                ]
+                ])
             }
+        },
+
+        delta: {
+            options: {
+                livereload: false
+            },
+
+            /**
+             * When our JavaScript source files change, we want to browserify
+             * but uglifying really not needed
+             */
+            'js-files': {
+                files: [srcDir + '/**/*.js*'],
+                tasks: ['babel:dev', 'webpack:dev']
+            },
+            'html-files': {
+                files: [srcDir + '/**/*.html'],
+                tasks: ['copy:index2Build']
+            }
+
+            /**
+             * When the LESS files change, we need to compile them.
+             * but not minify
+             */
+            // less: {
+            //     files: ['webapps/less/**/*.less', 'webapps/admin/components/**/*.less', 'webapps/public/components/**/*.less', 'webapps/common/components/**/*.less'],
+            //     tasks: ['less:admin', 'less:public']
+            // }
         }
     });
 
-    grunt.registerTask('build', ['clean', 'copy:index2Build', 'babel:dev', 'webpack:dev']);
+    /**
+     * In order to make it safe to just compile or copy *only* what was changed,
+     * we need to ensure we are starting from a clean, fresh build. So we rename
+     * the `watch` task to `delta` (that's why the configuration var above is
+     * `delta`) and then add a new task called `watch` that does a clean build
+     * before watching for changes.
+     */
+    grunt.renameTask('watch', 'delta');
+
+    grunt.registerTask('dev', ['clean', 'copy:index2Build', 'babel:dev', 'webpack:dev', 'delta']);
     grunt.registerTask('prod', ['clean', 'copy:index2Build', 'babel:prod', 'webpack:prod']);
 };

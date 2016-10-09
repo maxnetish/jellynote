@@ -1,0 +1,8 @@
+{
+  "connectionUri": "mongodb://localhost/jellynotedb",
+  "connectionOptions": {
+    "config": {
+      "autoIndex": true
+    }
+  }
+}

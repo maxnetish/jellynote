@@ -1,10 +1,11 @@
-const path = require("path");
-const webpack = require("webpack");
+const path = require('path');
+const webpack = require('webpack');
 
 module.exports = {
     cache: true,
     entry: {
-        client: './build/client.js'
+        webapp: './build/client.js',
+        vendor: ['react', 'react-dom']
         // jquery: "./app/jquery",
         // bootstrap: ["!bootstrap-webpack!./app/bootstrap/bootstrap.config.js", "./app/bootstrap"],
         // react: "./app/react"
@@ -13,6 +14,9 @@ module.exports = {
         path: 'build/assets',
         filename: "[name].bundle.js",
     },
+    plugins: [
+        new webpack.optimize.CommonsChunkPlugin('vendor', 'vendor.bundle.js')
+    ],
     module: {
         loaders: [
             // // required to write "require('./style.css')"
