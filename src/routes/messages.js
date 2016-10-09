@@ -2,7 +2,33 @@ import {Message} from '../data-service/models';
 import _ from 'lodash';
 
 function promiseMessageList(query) {
-    return Message.find(query)
+    let criteria = _.omit(query, 'sort');
+    let sort = query.sort;
+    return Message.find(criteria)
+        .lean()
+        .select('title annotation sendTimestamp receiveTimestamp')
+        .exec();
+}
+
+function promiseMessage(id) {
+    return Message.findById(id)
+        .populate({
+            path: 'senderAddress',
+            select: '_id content'
+        })
+        .populate({
+            path: 'receiverAddress',
+            select: '_id content'
+        })
+        .populate({
+            path: 'senderPerson',
+            select: '_id fio'
+        })
+        .populate({
+            path: 'receiverPerson',
+            select: '_id fio'
+        })
+        .lean()
         .exec();
 }
 
@@ -29,12 +55,20 @@ function sendResult(req, res) {
     return function (result) {
         res.send({
             params: req.params,
-            items: result
+            result: result
         });
     };
 }
 
 export default function (app) {
+    app.get({
+        name: 'message detail',
+        path: '/message/:id'
+    }, function(req, res, next) {
+        promiseMessage(req.params.id)
+            .then(sendResult(req, res))
+            .catch(next);
+    });
     app.get({
         name: 'messages list',
         path: '/messages'

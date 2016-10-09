@@ -5,7 +5,11 @@
 // mongoose.connect(mongooseConfig.connectionUri, mongooseConfig.connectionOptions);
 
 import MessageModel from './message';
+import AddressModel from './address';
+import PersonModel from './person';
 
 export {
-    MessageModel as Message
+    MessageModel as Message,
+    AddressModel as Address,
+    PersonModel as Person
 }
