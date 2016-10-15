@@ -4,12 +4,12 @@
 
 // mongoose.connect(mongooseConfig.connectionUri, mongooseConfig.connectionOptions);
 
-import MessageModel from './message';
+import LetterModel from './letter';
 import AddressModel from './address';
 import PersonModel from './person';
 
 export {
-    MessageModel as Message,
+    LetterModel as Letter,
     AddressModel as Address,
     PersonModel as Person
 }

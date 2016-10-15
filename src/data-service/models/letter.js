@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 
-let messageSchema = new mongoose.Schema({
+let letterSchema = new mongoose.Schema({
     contentMd: {
         type: String
     },
@@ -11,10 +11,12 @@ let messageSchema = new mongoose.Schema({
         type: String
     },
     sendTimestamp: {
-        type: Number
+        type: Number,
+        index: true
     },
     receiveTimestamp: {
-        type: Number
+        type: Number,
+        index: true
     },
     senderAddress: {
         type: mongoose.Schema.Types.ObjectId,
@@ -31,7 +33,18 @@ let messageSchema = new mongoose.Schema({
     receiverPerson: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Person'
+    },
+    media: [
+        {
+            url: String,
+            title: String,
+            type: String
+        }
+    ],
+    tags: {
+        type: [String],
+        index: true
     }
 });
 
-export default mongoose.model('Message', messageSchema);
+export default mongoose.model('Letter', letterSchema);

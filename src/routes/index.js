@@ -1,7 +1,11 @@
-import staticServe from './static-serve';
-import messages from './messages';
+import letters from './letters';
+import session from './session';
+import login from './login';
+import logout from './logout';
 
-export default function addRoutes (app) {
-    staticServe(app);
-    messages(app);
-}
+export {
+    letters,
+    login,
+    logout,
+    session
+};

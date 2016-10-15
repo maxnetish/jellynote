@@ -21,11 +21,11 @@ module.exports = function (grunt) {
         copy: {
             index2Build: {
                 files: [{
-                    expand: false,
+                    expand: true,
                     filter: 'isFile',
-                    flatten: false,
-                    src: srcDir + '/index.html',
-                    dest: buildDir + '/index.html'
+                    flatten: true,
+                    src: srcDir + '/*.html',
+                    dest: buildDir
                 }]
             }
         },

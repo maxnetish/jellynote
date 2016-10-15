@@ -10,7 +10,8 @@ let personSchema = new mongoose.Schema({
     media: [
         {
             url: String,
-            title: String
+            title: String,
+            type: String
         }
     ],
     DOBtimestamp: {

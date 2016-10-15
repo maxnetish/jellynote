@@ -4,5 +4,6 @@
     "config": {
       "autoIndex": true
     }
-  }
+  },
+  "paginationDefaultLimit": 20
 }

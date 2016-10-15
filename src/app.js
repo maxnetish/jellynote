@@ -1,47 +1,51 @@
-import restify from 'restify';
-import wwwConfig from '../config/www.json'
-import addRoutes from './routes';
-import bunyan from 'bunyan';
+import express from 'express';
+import path from 'path';
+import wwwConfig from '../config/www.json';
+import authConfig from '../config/auth.json';
 import mongoose from 'mongoose';
 import mongooseConfig from '../config/mongoose.json';
-import os from 'os';
 
+import * as routes from './routes';
 
-function echoRespond(req, res, next) {
+import bodyParser from 'body-parser';
+import responseTime from 'response-time';
+import serveFavicon from 'serve-favicon';
+import mongoAdmin from 'sriracha';
+import serveStatic from 'serve-static';
+import session from 'express-session';
+import passport from 'passport';
+import {Strategy} from 'passport-local';
+
+import cookieParser from 'cookie-parser';
+
+function echoRespond(req, res) {
     res.send({'hello': req.params.name});
-    next();
 }
 
-function onError(error) {
-    if (error.syscall !== 'listen') {
-        throw error;
+var app = express();
+var apiApp = express();
+
+/**
+ * Setup passport
+ */
+var localStrategy = new Strategy((username, password, done) => {
+    if (username === authConfig.admin.userName && password === authConfig.admin.password) {
+        return done(null, username);
     }
-
-    var bind = typeof port === 'string'
-        ? 'Pipe ' + port
-        : 'Port ' + port;
-
-    // handle specific listen errors with friendly messages
-    switch (error.code) {
-        case 'EACCES':
-            console.error(bind + ' requires elevated privileges');
-            process.exit(1);
-            break;
-        case 'EADDRINUSE':
-            console.error(bind + ' is already in use');
-            process.exit(1);
-            break;
-        default:
-            throw error;
-    }
-}
-
-var app = restify.createServer({
-    name: 'jellynote'
+    return done(null, false);
+});
+passport.use(localStrategy);
+passport.serializeUser(function (user, done) {
+    done(null, user);
 });
 
+passport.deserializeUser(function (id, done) {
+    done(null, id);
+});
 
-// init mongoose
+/**
+ * setup mongoose
+ */
 mongoose.Promise = global.Promise;
 mongoose.connect(mongooseConfig.connectionUri, Object.assign(mongooseConfig.connectionOptions, {promiseLibrary: global.Promise}))
     .then(function (response) {
@@ -52,51 +56,61 @@ mongoose.connect(mongooseConfig.connectionUri, Object.assign(mongooseConfig.conn
         console.error(`Cannot connect to database ${mongooseConfig.connectionUri}, ${err}`);
     });
 
-app.on('error', onError);
+/**
+ * setup app
+ */
+// app.use(serveFavicon());
+app.use(responseTime());
+app.use(bodyParser.urlencoded({extended: false}));
 
-// body parser
-app.use(restify.bodyParser({
-    maxBodySize: 1048576,
-    mapParams: false,
-    mapFiles: false,
-    overrideParams: false,
-    // multipartHandler: function(part) {
-    //     part.on('data', function(data) {
-    //         /* do something with the multipart data */
-    //     });
-    // },
-    // multipartFileHandler: function(part) {
-    //     part.on('data', function(data) {
-    //         /* do something with the multipart file data */
-    //     });
-    // },
-    keepExtensions: false,
-    uploadDir: os.tmpdir()
-    // multiples: true
-    // hash: 'sha1'
+app.use(cookieParser());
+app.use(session({
+    cookie: {
+        httpOnly: true,
+    },
+    name: 'jellynote.id',
+    proxy: true,
+    secret: 'À la fin de 1980, il rencontre à l’université',
+    resave: true,
+    saveUninitialized: true
 }));
+app.use(passport.initialize());
+app.use(passport.session());
 
-// query parser
-app.use(restify.queryParser({
-    mapParams: true
+app.use('/api', apiApp);
+app.use(serveStatic(path.join(__dirname, 'assets'), {
+    index: false
 }));
-
-// compress
-app.use(restify.gzipResponse());
-
-app.get('/hello/:name', echoRespond);
-app.head('/hello/:name', echoRespond);
-
-// FIXME remove or switch in debug mode only
-app.on('after', restify.auditLogger({
-    log: bunyan.createLogger({
-        name: 'audit',
-        stream: process.stdout
-    })
+app.get('/', function (req, res) {
+    res.sendFile(__dirname + '/index.html');
+});
+app.use('/mongo-admin', mongoAdmin({
+    userName: 'admin',
+    password: 'avecmoi'
 }));
+app.use('/login', routes.login);
+app.use('/logout', routes.logout);
+app.use(function (err, req, res, next) {
+    console.error(err.stack);
+    res.status(500).send('Internal error');
+});
 
-addRoutes(app);
+/**
+ * setup apiApp
+ */
+apiApp.use(bodyParser.json());
+apiApp.get('/hello/:name', echoRespond);
+// add letters api
+apiApp.use('/letters', routes.letters);
+apiApp.use('/session', routes.session);
+apiApp.use(function (err, req, res, next) {
+    console.error(err.stack);
+    res.status(500).json({error: 'internal error'});
+});
 
+/**
+ * begin listen port
+ */
 app.listen(process.env.PORT || wwwConfig.port || 3000, function () {
     console.info(`${app.name} started and listening at ${app.url}`);
 });
