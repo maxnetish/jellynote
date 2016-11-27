@@ -1,0 +1,39 @@
+// should be first
+@import 'npm://bootstrap/less/normalize';
+//@import 'npm://bootstrap/less/theme';
+@import 'variables';
+
+body {
+  font-family: @jellynote_base_font;
+}
+
+.main-wrapper {
+  display: flex;
+  align-items: stretch;
+
+  width: 100%;
+
+  @media only screen and (max-width: @jellynote_small_breakpoint), only screen and (max-device-width: @jellynote_small_breakpoint) {
+    flex-direction: column;
+  }
+
+  .main-left-pane {
+    background-color: lemonchiffon;
+
+    width: 20%;
+
+    @media only screen and (max-width: @jellynote_small_breakpoint), only screen and (max-device-width: @jellynote_small_breakpoint) {
+      width: 100%;
+    }
+  }
+
+  .main-right-pane {
+    background-color: antiquewhite;
+
+    width: 80%;
+
+    @media only screen and (max-width: @jellynote_small_breakpoint), only screen and (max-device-width: @jellynote_small_breakpoint) {
+      width: 100%;
+    }
+  }
+}

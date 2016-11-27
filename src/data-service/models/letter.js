@@ -20,27 +20,33 @@ let letterSchema = new mongoose.Schema({
     },
     senderAddress: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Address'
+        ref: 'Address',
+        adminFieldType: 'ref'
     },
     receiverAddress: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Address'
+        ref: 'Address',
+        adminFieldType: 'ref'
     },
     senderPerson: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Person'
+        ref: 'Person',
+        adminFieldType: 'ref'
     },
     receiverPerson: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Person'
+        ref: 'Person',
+        adminFieldType: 'ref'
     },
-    media: [
-        {
-            url: String,
-            title: String,
-            type: String
-        }
-    ],
+    // Это потом
+    // GridFS будет
+    // media: [
+    //     {
+    //         url: String,
+    //         title: String,
+    //         type: String
+    //     }
+    // ],
     tags: {
         type: [String],
         index: true

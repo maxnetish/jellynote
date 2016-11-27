@@ -14,6 +14,7 @@ import mongoAdmin from 'sriracha';
 import serveStatic from 'serve-static';
 import session from 'express-session';
 import passport from 'passport';
+import * as passportConfig from './passport';
 import {Strategy} from 'passport-local';
 
 import cookieParser from 'cookie-parser';
@@ -28,20 +29,7 @@ var apiApp = express();
 /**
  * Setup passport
  */
-var localStrategy = new Strategy((username, password, done) => {
-    if (username === authConfig.admin.userName && password === authConfig.admin.password) {
-        return done(null, username);
-    }
-    return done(null, false);
-});
-passport.use(localStrategy);
-passport.serializeUser(function (user, done) {
-    done(null, user);
-});
-
-passport.deserializeUser(function (id, done) {
-    done(null, id);
-});
+passportConfig.setupPassport(passport);
 
 /**
  * setup mongoose
@@ -49,7 +37,7 @@ passport.deserializeUser(function (id, done) {
 mongoose.Promise = global.Promise;
 mongoose.connect(mongooseConfig.connectionUri, Object.assign(mongooseConfig.connectionOptions, {promiseLibrary: global.Promise}))
     .then(function (response) {
-        console.info(`Connected to database ${mongooseConfig.connectionUri}, response: ${response}`);
+        console.info(`Connected to database ${mongooseConfig.connectionUri}`);
         return response;
     })
     .catch(function (err) {
@@ -82,12 +70,19 @@ app.use(serveStatic(path.join(__dirname, 'assets'), {
     index: false
 }));
 app.get('/', function (req, res) {
-    res.sendFile(__dirname + '/index.html');
+    let indexFile;
+    if (req.user && req.user.role==='admin'){
+        indexFile = 'index-admin.html';
+    } else {
+        indexFile = 'index-pub.html';
+    }
+    res.sendFile(path.join(__dirname, indexFile));
 });
-app.use('/mongo-admin', mongoAdmin({
-    userName: 'admin',
-    password: 'avecmoi'
-}));
+// TODO выпилить mongo-admin: бесполезно
+// app.use('/mongo-admin', mongoAdmin({
+//     userName: authConfig.admin.userName,
+//     password: authConfig.admin.password
+// }));
 app.use('/login', routes.login);
 app.use('/logout', routes.logout);
 app.use(function (err, req, res, next) {
@@ -111,8 +106,9 @@ apiApp.use(function (err, req, res, next) {
 /**
  * begin listen port
  */
-app.listen(process.env.PORT || wwwConfig.port || 3000, function () {
-    console.info(`${app.name} started and listening at ${app.url}`);
+let portToListen = process.env.PORT || wwwConfig.port || 3000;
+app.listen(portToListen, function () {
+    console.info(`${app.name} started and listening on port ${portToListen}`);
 });
 
 export default app;

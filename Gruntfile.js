@@ -1,11 +1,10 @@
-
 module.exports = function (grunt) {
 
     var buildDir = 'build';
     var srcDir = 'src';
     var mainAppFile = 'app.js';
     var webpack = require('webpack');
-    var webpackCommonOptions =  require('./webpack.config.js');
+    var webpackCommonOptions = require('./webpack.config.js');
     var path = require('path');
 
     require('time-grunt')(grunt);
@@ -34,8 +33,8 @@ module.exports = function (grunt) {
             'dev': {
                 options: {
                     sourceMap: true,
-                    presets: ['react'],
-                    plugins: ['transform-es2015-modules-commonjs'],
+                    presets: ['react', 'es2015'],
+                    // plugins: ['transform-es2015-modules-commonjs'],
                     // auxiliaryCommentBefore: 'Babel jsx transform:',
                     // auxiliaryCommentAfter: 'end of jsx transform',
                     ast: false
@@ -53,12 +52,12 @@ module.exports = function (grunt) {
             'prod': {
                 options: {
                     sourceMap: false,
-                    presets: ['react'],
+                    presets: ['react', 'es2015'],
                     // uglify2JS doesn't support es6
-                    plugins: [
-                        'transform-es2015-modules-commonjs',
-                        'transform-es2015-template-literals'
-                    ],
+                    // plugins: [
+                    //     'transform-es2015-modules-commonjs',
+                    //     'transform-es2015-template-literals'
+                    // ],
                     ast: false
                 },
                 files: [
@@ -93,6 +92,40 @@ module.exports = function (grunt) {
             }
         },
 
+        less: {
+            dev: {
+                files: [{
+                    src: 'src/react-app/**/*.less',
+                    dest: buildDir + '/assets/bundle.css'
+                }],
+                options: {
+                    sourceMap: true,
+                    outputSourceFiles: true,
+                    plugins: [
+                        new (require('less-plugin-npm-import')),
+                        new (require('less-plugin-autoprefix'))({
+                            browsers: ['last 2 versions']
+                        })
+                    ]
+                }
+            },
+            prod: {
+                files: [{
+                    src: 'src/react-app/**/*.less',
+                    dest: buildDir + '/assets/bundle.css'
+                }],
+                options: {
+                    sourceMap: false,
+                    plugins: [
+                        new (require('less-plugin-npm-import')),
+                        new (require('less-plugin-autoprefix'))({
+                            browsers: ['last 2 versions']
+                        })
+                    ]
+                }
+            }
+        },
+
         delta: {
             options: {
                 livereload: false
@@ -109,16 +142,16 @@ module.exports = function (grunt) {
             'html-files': {
                 files: [srcDir + '/**/*.html'],
                 tasks: ['copy:index2Build']
-            }
+            },
 
             /**
              * When the LESS files change, we need to compile them.
              * but not minify
              */
-            // less: {
-            //     files: ['webapps/less/**/*.less', 'webapps/admin/components/**/*.less', 'webapps/public/components/**/*.less', 'webapps/common/components/**/*.less'],
-            //     tasks: ['less:admin', 'less:public']
-            // }
+            less: {
+                files: ['src/react-app/**/*.less'],
+                tasks: ['less:dev']
+            }
         }
     });
 
@@ -131,6 +164,6 @@ module.exports = function (grunt) {
      */
     grunt.renameTask('watch', 'delta');
 
-    grunt.registerTask('dev', ['clean', 'copy:index2Build', 'babel:dev', 'webpack:dev', 'delta']);
-    grunt.registerTask('prod', ['clean', 'copy:index2Build', 'babel:prod', 'webpack:prod']);
+    grunt.registerTask('dev', ['clean', 'copy:index2Build', 'babel:dev', 'webpack:dev', 'less:dev', 'delta']);
+    grunt.registerTask('prod', ['clean', 'copy:index2Build', 'babel:prod', 'webpack:prod', 'less:prod']);
 };
