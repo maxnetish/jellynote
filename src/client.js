@@ -12,5 +12,6 @@ console.info(`Webapp loaded React Dom: ${ReactDOM.version}`);
 console.log('Admin mode');
 
 ReactDOM.render(
+    <JellynoteApp></JellynoteApp>,
     document.getElementById('react-app')
 );
