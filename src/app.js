@@ -70,12 +70,7 @@ app.use(serveStatic(path.join(__dirname, 'assets'), {
     index: false
 }));
 app.get('/', function (req, res) {
-    let indexFile;
-    if (req.user && req.user.role==='admin'){
-        indexFile = 'index-admin.html';
-    } else {
-        indexFile = 'index-pub.html';
-    }
+    let indexFile = 'index.html';
     res.sendFile(path.join(__dirname, indexFile));
 });
 // TODO выпилить mongo-admin: бесполезно

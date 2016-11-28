@@ -8,7 +8,9 @@ const UserBadgeActions = Reflux.createActions({
     'componentMounted': actionAsyncOptions,
     'dataGet': actionAsyncOptions,
     'dataGetCompleted': actionAsyncOptions,
-    'dataGetFailed': actionAsyncOptions
+    'dataGetFailed': actionAsyncOptions,
+    'login': actionSyncOptions,
+    'loginCancel': actionSyncOptions
 });
 
 class UserBadgeStore extends Reflux.Store {
@@ -18,7 +20,9 @@ class UserBadgeStore extends Reflux.Store {
         this.state = {
             loading: false,
             user: {},
-            retrievedOnce: false
+            retrievedOnce: false,
+            loginDialogVisible: false,
+            mode: 'UNKNOWN'
         };
     }
 
@@ -37,6 +41,7 @@ class UserBadgeStore extends Reflux.Store {
     onDataGetCompleted(data) {
         this.state.loading = false;
         this.state.user = data;
+        this.state.mode = data.userName ? 'LOGGED' : 'ANON';
         this.trigger(this.state);
     }
 
@@ -44,6 +49,16 @@ class UserBadgeStore extends Reflux.Store {
         this.state.loading = false;
         this.state.error = err;
         console.error(err);
+        this.trigger(this.state);
+    }
+
+    onLogin() {
+        this.state.loginDialogVisible = true;
+        this.trigger(this.state);
+    }
+
+    onLoginCancel() {
+        this.state.loginDialogVisible = false;
         this.trigger(this.state);
     }
 }
@@ -56,8 +71,8 @@ function getData() {
             return result;
         })
         ['catch'](function (err) {
-            UserBadgeActions.dataGetFailed(err);
-        });
+        UserBadgeActions.dataGetFailed(err);
+    });
 }
 
 export {

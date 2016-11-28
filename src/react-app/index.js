@@ -1,7 +1,7 @@
 import React from 'react';
 import {Component as ReactComponent} from 'react';
 
-import {UserBadge} from './components/user-badge/user-badge';
+import UserBadge from './components/user-badge/user-badge';
 
 class JellynoteApp extends ReactComponent {
     // constructor(props) {

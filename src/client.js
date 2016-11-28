@@ -9,8 +9,8 @@ import ReactDOM from 'react-dom';
 import {JellynoteApp} from './react-app';
 
 console.info(`Webapp loaded React Dom: ${ReactDOM.version}`);
+console.log('Admin mode');
 
 ReactDOM.render(
-    <JellynoteApp mode="PUB"></JellynoteApp>,
     document.getElementById('react-app')
 );

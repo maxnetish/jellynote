@@ -4,9 +4,9 @@ const webpack = require('webpack');
 module.exports = {
     cache: true,
     entry: {
-        'webapp-pub': './build/client-pub.js',
-        'webapp-admin': './build/client-admin.js',
-        vendor: ['core-js/es6/promise', 'whatwg-fetch', 'react', 'react-dom']
+        'webapp': './build/client.js',
+        'vendor': ['react', 'react-dom', 'core-js/es6/promise', 'whatwg-fetch', 'reflux', 'elemental/lib/components/Button']
+        // vendor: ['core-js/es6/promise', 'whatwg-fetch', 'react', 'react-dom']
         // jquery: "./app/jquery",
         // bootstrap: ["!bootstrap-webpack!./app/bootstrap/bootstrap.config.js", "./app/bootstrap"],
         // react: "./app/react"
