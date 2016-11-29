@@ -1,13 +1,15 @@
 import Reflux from 'reflux';
 
+import {session as sessionResource} from '../../resources';
+
 const actionSyncOptions = {sync: true};
 const actionAsyncOptions = {sync: false};
 
 const LoginDialogActions = Reflux.createActions({
     'login': actionSyncOptions,
-    'loginComleted': actionAsyncOptions,
+    'loginCompleted': actionAsyncOptions,
     'loginFailed': actionAsyncOptions,
-    cancel: actionSyncOptions
+    'cancel': actionSyncOptions
 });
 
 class LoginDialogStore extends Reflux.Store {
@@ -22,16 +24,32 @@ class LoginDialogStore extends Reflux.Store {
         };
     }
 
-    onLogin() {
+    onLogin(data) {
+        this.state.loading = true;
+        this.state.error = false;
+        this.trigger(this.state);
 
+        sessionResource.postLogin(data)
+            .then(function onSuccessLogin(response) {
+                LoginDialogActions.loginCompleted();
+                return response;
+            })
+            .catch(function (err) {
+                LoginDialogActions.loginFailed(err);
+            });
     }
 
-    onLoginCompleted(user) {
-
+    onLoginCompleted() {
+        this.state.loading = false;
+        this.state.error = null;
+        sessionResource.get(true);
+        this.trigger(this.state);
     }
 
     onLoginFailed(err) {
-
+        this.state.loading = false;
+        this.state.error = err;
+        this.trigger(this.state);
     }
 
     onCancel() {

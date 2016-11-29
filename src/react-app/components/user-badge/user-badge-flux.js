@@ -58,6 +58,7 @@ class UserBadgeStore extends Reflux.Store {
     }
 
     onLoginCancel() {
+        console.info('onLoginCancel throws');
         this.state.loginDialogVisible = false;
         this.trigger(this.state);
     }
