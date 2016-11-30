@@ -15,7 +15,10 @@ const localStrategy = new Strategy((username, password, done) => {
         return done(null, false);
     }
 
-    return done(null, findedUser);
+    return done(null, {
+        userName: findedUser.userName,
+        role: findedUser.role
+    });
 });
 
 function setupPassport(passport) {
@@ -29,10 +32,10 @@ function setupPassport(passport) {
         let findedUser = authConfig.find(elem => {
                 return elem.userName === id;
             }) || {};
-        if (findedUser && findedUser.hasOwnProperty('password')) {
-            delete findedUser.password;
-        }
-        done(null, findedUser);
+        done(null, {
+            userName: findedUser.userName,
+            role: findedUser.role
+        });
     });
 
     return passport;

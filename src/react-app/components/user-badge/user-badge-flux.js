@@ -10,7 +10,11 @@ const UserBadgeActions = Reflux.createActions({
     'dataGetCompleted': actionAsyncOptions,
     'dataGetFailed': actionAsyncOptions,
     'login': actionSyncOptions,
-    'loginCancel': actionSyncOptions
+    'loginCancel': actionSyncOptions,
+    'loginDialogFullfilled': actionAsyncOptions, // TODO дернуть это событие...
+    'logout': actionSyncOptions,
+    'logoutCompleted': actionAsyncOptions,
+    'logoutFailed': actionAsyncOptions
 });
 
 class UserBadgeStore extends Reflux.Store {
@@ -22,7 +26,8 @@ class UserBadgeStore extends Reflux.Store {
             user: {},
             retrievedOnce: false,
             loginDialogVisible: false,
-            mode: 'UNKNOWN'
+            mode: 'UNKNOWN',
+            error: null
         };
     }
 
@@ -62,18 +67,48 @@ class UserBadgeStore extends Reflux.Store {
         this.state.loginDialogVisible = false;
         this.trigger(this.state);
     }
+
+    onLoginDialogFullfilled () {
+        this.state.loginDialogVisible = false;
+        this.trigger(this.state);
+    }
+
+    onLogout() {
+        this.state.loading = true;
+        this.trigger(this.state);
+
+        sessionResource.postLogout()
+            .then(() => {
+                UserBadgeActions.logoutCompleted();
+                return response;
+            })
+            .catch(err => UserBadgeActions.logoutFailed(err))
+    }
+
+    onLogoutCompleted() {
+        this.state.loading = false;
+        this.state.error = null;
+        this.state.user = {};
+        this.state.mode = 'ANON';
+        sessionResource.get(true);
+        this.trigger(this.state);
+    }
+
+    onLogoutFailed(err) {
+        this.state.loading = false;
+        this.state.error = err;
+        this.trigger(this.state);
+    }
 }
 
 function getData() {
     UserBadgeActions.dataGet();
     sessionResource.get()
-        .then(function (result) {
+        .then(result => {
             UserBadgeActions.dataGetCompleted(result);
             return result;
         })
-        ['catch'](function (err) {
-        UserBadgeActions.dataGetFailed(err);
-    });
+        ['catch'](err => UserBadgeActions.dataGetFailed(err));
 }
 
 export {

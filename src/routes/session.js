@@ -9,13 +9,13 @@ router.route('/')
 // data should be x-www-form-urlencoded
 router.route('/login')
     .post(passport.authenticate('local'), (req, res) => {
-        res.send(204); //No Content (success), else will be 401 Unauthorized
+        res.sendStatus(204); //No Content (success), else will be 401 Unauthorized
     });
 
 router.route('/logout')
     .post((req, res) => {
         req.logout();
-        res.send(204); //No Content (success)
+        res.sendStatus(204); //No Content (success)
     });
 
 export default router;

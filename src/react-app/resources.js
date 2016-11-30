@@ -59,9 +59,9 @@ const session = {
         })
             .then(function (response) {
                 if (response.status < 200 || response.status >= 300) {
-                    throw response.statusText;
+                    throw `Login failed. Server says: ${response.status} ${response.statusText}.`;
                 }
-                return response.json();
+                return response;
             });
     }
 };

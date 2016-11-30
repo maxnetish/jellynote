@@ -26,7 +26,7 @@ class LoginDialogStore extends Reflux.Store {
 
     onLogin(data) {
         this.state.loading = true;
-        this.state.error = false;
+        this.state.error = null;
         this.trigger(this.state);
 
         sessionResource.postLogin(data)
@@ -42,6 +42,7 @@ class LoginDialogStore extends Reflux.Store {
     onLoginCompleted() {
         this.state.loading = false;
         this.state.error = null;
+        this.state.onFullfill();
         sessionResource.get(true);
         this.trigger(this.state);
     }
@@ -53,7 +54,8 @@ class LoginDialogStore extends Reflux.Store {
     }
 
     onCancel() {
-
+        this.state.error = null;
+        this.trigger(this.state);
     }
 }
 

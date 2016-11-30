@@ -9,6 +9,9 @@ import Button from 'elemental/lib/components/Button';
 import Form from 'elemental/lib/components/Form';
 import FormField from 'elemental/lib/components/FormField';
 import FormInput from 'elemental/lib/components/FormInput';
+import Spinner from 'elemental/lib/components/Spinner';
+import Glyph from 'elemental/lib/components/Glyph';
+import Alert from 'elemental/lib/components/Alert';
 
 
 import * as LoginDialogFlux from './login-dialog-flux';
@@ -17,12 +20,12 @@ class LoginDialog extends RefluxComponent {
 
     constructor(props) {
         super(props);
-
-        this.state = {};
         this.store = LoginDialogFlux.LoginDialogStore; // <- the only thing needed to tie the store into this component
     }
 
     render() {
+        console.log('On render: ', this.state);
+
         let formId = 'jellynote-login-form',
             usernameId = 'jellynote-login-form-input-username',
             passwordId = 'jellynote-login-form-input-password';
@@ -33,21 +36,30 @@ class LoginDialog extends RefluxComponent {
                 <Form id={formId} onSubmit={this.onFormSubmit.bind(this)} name={formId} method="POST">
                     <FormField label="Login" htmlFor={usernameId}>
                         <FormInput autoFocus type="text" placeholder="Enter user name" name="username" required
-                                   id={usernameId}/>
+                                   id={usernameId} disabled={this.state.loading}/>
                     </FormField>
                     <FormField label="Password" htmlFor={passwordId}>
-                        <FormInput type="password" placeholder="Password" name="password" id={passwordId}/>
+                        <FormInput type="password" placeholder="Password" name="password" id={passwordId}
+                                   disabled={this.state.loading}/>
                     </FormField>
                 </Form>
+                {/*{if (this.state.error) {return <Alert type="danger"><strong>Error:</strong> {this.state.error}</Alert>;}}*/}
+                {this.state.error ? <Alert type="danger"><strong>Error:</strong> {this.state.error}</Alert> : null}
             </ModalBody>
             <ModalFooter>
-                <Button type="primary" submit form={formId}>Login</Button>
-                <Button type="link-cancel" onClick={this.onCancel.bind(this)}>Cancel</Button>
+                <Button type="primary" submit form={formId} disabled={this.state.loading}>
+                    {this.state.loading ? <Spinner type="inverted"/> : <Glyph icon="log-in"/>}
+                    &nbsp;Login
+                </Button>
+                <Button type="link-cancel" onClick={this.onCancel.bind(this)}
+                        disabled={this.state.loading}>Cancel</Button>
             </ModalFooter>
         </Modal>;
     }
 
     onCancel(e) {
+        e.preventDefault();
+        LoginDialogFlux.LoginDialogActions.cancel();
         this.props.onClose();
     }
 
@@ -64,7 +76,8 @@ class LoginDialog extends RefluxComponent {
 
 LoginDialog.propTypes = {
     isOpen: React.PropTypes.bool,
-    onClose: React.PropTypes.func
+    onClose: React.PropTypes.func,
+    onFullfill: React.PropTypes.func
 };
 
 export default LoginDialog;
