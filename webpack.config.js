@@ -10,7 +10,7 @@ module.exports = {
     // entry: './build/client.js',
     entry: {
         'client': './build/client.js',
-        'common': ['react', 'react-dom', 'core-js/es6/promise', 'whatwg-fetch', 'reflux', 'elemental/lib/components/Button']
+        'common': ['react', 'react-dom', 'core-js/es6/promise', 'whatwg-fetch', 'reflux']
         // vendor: ['core-js/es6/promise', 'whatwg-fetch', 'react', 'react-dom']
         // jquery: "./app/jquery",
         // bootstrap: ["!bootstrap-webpack!./app/bootstrap/bootstrap.config.js", "./app/bootstrap"],
@@ -19,7 +19,7 @@ module.exports = {
     output: {
         path: 'build/assets',
         filename: '[name].js',
-        chunkFilename: '[id].chunk.js',
+        chunkFilename: '[name].[id].chunk.js',
         publicPath: '/'
     },
     // output: {
@@ -57,20 +57,26 @@ module.exports = {
             // { test: /\.js$/,    loader: "jsx-loader" },
             // { test: /\.jsx$/,   loader: "jsx-loader?insertPragma=React.DOM" },
         ]
-    }/*,
+    },
     resolve: {
         alias: {
+            // prect-compat:
+            // 'preact-compat/lib/ReactCSSTransitionGroup$': 'react/lib/ReactCSSTransitionGroup',
+            // "react": "preact-compat",
+            // "react-dom": "preact-compat",
+            // 'react-addons-css-transition-group': 'rc-css-transition-group'
+
             // Bind version of jquery
-            jquery: "jquery-2.0.3",
+            // jquery: "jquery-2.0.3",
 
             // Bind version of jquery-ui
-            "jquery-ui": "jquery-ui-1.10.3",
+            // "jquery-ui": "jquery-ui-1.10.3",
 
             // jquery-ui doesn't contain a index file
             // bind module to the complete module
-            "jquery-ui-1.10.3$": "jquery-ui-1.10.3/ui/jquery-ui.js",
+            // "jquery-ui-1.10.3$": "jquery-ui-1.10.3/ui/jquery-ui.js",
         }
-    },
+    }/*,
     plugins: [
         new webpack.ProvidePlugin({
             // Automtically detect jQuery and $ as free var in modules

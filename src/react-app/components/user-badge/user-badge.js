@@ -51,7 +51,7 @@ class UserBadge extends RefluxComponent {
             'UNKNOWN': <div></div>
         };
 
-        return <div className="user-badge">
+        return <div className="sidebar-item user-badge">
             {internalMarkup[this.state.mode]}
         </div>;
     }
