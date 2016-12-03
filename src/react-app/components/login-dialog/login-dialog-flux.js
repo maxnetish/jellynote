@@ -1,11 +1,14 @@
 import Reflux from 'reflux';
 
 import {session as sessionResource} from '../../resources';
+import * as GlobalDispatcher from '../../main-dispatcher';
 
 const actionSyncOptions = {sync: true};
 const actionAsyncOptions = {sync: false};
 
 const LoginDialogActions = Reflux.createActions({
+    'componentMounted': actionSyncOptions,
+    'componentWillReceiveProps': actionSyncOptions,
     'login': actionSyncOptions,
     'loginCompleted': actionAsyncOptions,
     'loginFailed': actionAsyncOptions,
@@ -18,10 +21,16 @@ class LoginDialogStore extends Reflux.Store {
         this.listenables = LoginDialogActions;
         this.state = {
             loading: false,
-            userName: '',
-            password: '',
             error: null
         };
+    }
+
+    onComponentMounted (props) {
+        this.props = props;
+    }
+
+    onComponentWillReceiveProps(newProps, oldProps) {
+        this.props = newProps;
     }
 
     onLogin(data) {
@@ -31,7 +40,7 @@ class LoginDialogStore extends Reflux.Store {
 
         sessionResource.postLogin(data)
             .then(function onSuccessLogin(response) {
-                LoginDialogActions.loginCompleted();
+                LoginDialogActions.loginCompleted(data);
                 return response;
             })
             .catch(function (err) {
@@ -39,11 +48,12 @@ class LoginDialogStore extends Reflux.Store {
             });
     }
 
-    onLoginCompleted() {
+    onLoginCompleted(data) {
         this.state.loading = false;
         this.state.error = null;
-        this.state.onFullfill();
-        sessionResource.get(true);
+        this.props.onFullfill(data);
+        sessionResource.clear();
+        GlobalDispatcher.Dispatcher.emit(GlobalDispatcher.Event.USER_CHANGED, data);
         this.trigger(this.state);
     }
 
@@ -55,6 +65,7 @@ class LoginDialogStore extends Reflux.Store {
 
     onCancel() {
         this.state.error = null;
+        this.props.onCancel();
         this.trigger(this.state);
     }
 }

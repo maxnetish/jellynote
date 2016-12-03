@@ -1,11 +1,16 @@
 const path = require('path');
 const webpack = require('webpack');
 
+// like 'react-app/routes/bla-bla/index.js'
+var routeComponentRegex = /react-app\/routes\/[^\/]+\/index\.js/;
+
 module.exports = {
     cache: true,
+
+    // entry: './build/client.js',
     entry: {
-        'webapp': './build/client.js',
-        'vendor': ['react', 'react-dom', 'core-js/es6/promise', 'whatwg-fetch', 'reflux', 'elemental/lib/components/Button']
+        'client': './build/client.js',
+        'common': ['react', 'react-dom', 'core-js/es6/promise', 'whatwg-fetch', 'reflux', 'elemental/lib/components/Button']
         // vendor: ['core-js/es6/promise', 'whatwg-fetch', 'react', 'react-dom']
         // jquery: "./app/jquery",
         // bootstrap: ["!bootstrap-webpack!./app/bootstrap/bootstrap.config.js", "./app/bootstrap"],
@@ -13,13 +18,32 @@ module.exports = {
     },
     output: {
         path: 'build/assets',
-        filename: "[name].bundle.js",
+        filename: '[name].js',
+        chunkFilename: '[id].chunk.js',
+        publicPath: '/'
     },
+    // output: {
+    //     path: 'build/assets',
+    //     filename: "[name].bundle.js",
+    // },
     plugins: [
-        new webpack.optimize.CommonsChunkPlugin('vendor', 'vendor.bundle.js')
+        new webpack.optimize.CommonsChunkPlugin('common', 'common.bundle.js')
     ],
     module: {
         loaders: [
+            // make sure to exclude route components here
+            // {
+            //     test: /\.js$/,
+            //     include: path.resolve(__dirname, 'build'),
+            //     exclude: routeComponentRegex,
+            //     loader: 'console'
+            // },
+            // lazy load route components
+            // {
+            //     test: routeComponentRegex,
+            //     include: path.resolve(__dirname, 'build'),
+            //     loaders: ['console', 'bundle?lazy']
+            // }
             // // required to write "require('./style.css')"
             // { test: /\.css$/,    loader: "style-loader!css-loader" },
             //

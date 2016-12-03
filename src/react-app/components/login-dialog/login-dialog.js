@@ -23,6 +23,14 @@ class LoginDialog extends RefluxComponent {
         this.store = LoginDialogFlux.LoginDialogStore; // <- the only thing needed to tie the store into this component
     }
 
+    componentDidMount() {
+        LoginDialogFlux.LoginDialogActions.componentMounted(this.props);
+    }
+
+    componentWillReceiveProps(nextProps) {
+        LoginDialogFlux.LoginDialogActions.componentWillReceiveProps(nextProps, this.props);
+    }
+
     render() {
         console.log('On render: ', this.state);
 
@@ -58,9 +66,10 @@ class LoginDialog extends RefluxComponent {
     }
 
     onCancel(e) {
-        e.preventDefault();
+        if (e && e.preventDefault) {
+            e.preventDefault();
+        }
         LoginDialogFlux.LoginDialogActions.cancel();
-        this.props.onClose();
     }
 
     onFormSubmit(e) {
@@ -76,8 +85,8 @@ class LoginDialog extends RefluxComponent {
 
 LoginDialog.propTypes = {
     isOpen: React.PropTypes.bool,
-    onClose: React.PropTypes.func,
-    onFullfill: React.PropTypes.func
+    onCancel: React.PropTypes.func.isRequired,
+    onFullfill: React.PropTypes.func.isRequired
 };
 
 export default LoginDialog;

@@ -1,11 +1,14 @@
 import Reflux from 'reflux';
+
 import {session as sessionResource} from '../../resources';
+import * as GlobalDispatcher from '../../main-dispatcher';
 
 const actionSyncOptions = {sync: true};
 const actionAsyncOptions = {sync: false};
 
 const UserBadgeActions = Reflux.createActions({
     'componentMounted': actionAsyncOptions,
+    'componentUnmount': actionSyncOptions,
     'dataGet': actionAsyncOptions,
     'dataGetCompleted': actionAsyncOptions,
     'dataGetFailed': actionAsyncOptions,
@@ -29,12 +32,18 @@ class UserBadgeStore extends Reflux.Store {
             mode: 'UNKNOWN',
             error: null
         };
+
+        GlobalDispatcher.Dispatcher.on(GlobalDispatcher.Event.USER_CHANGED, getData);
     }
 
     onComponentMounted() {
         if (!this.retrievedOnce) {
             getData();
         }
+    }
+
+    onComponentUnmount () {
+        GlobalDispatcher.Dispatcher.removeListener(GlobalDispatcher.Event.USER_CHANGED, getData);
     }
 
     onDataGet() {
@@ -88,9 +97,8 @@ class UserBadgeStore extends Reflux.Store {
     onLogoutCompleted() {
         this.state.loading = false;
         this.state.error = null;
-        this.state.user = {};
-        this.state.mode = 'ANON';
-        sessionResource.get(true);
+        sessionResource.clear();
+        GlobalDispatcher.Dispatcher.emit(GlobalDispatcher.Event.USER_CHANGED, {});
         this.trigger(this.state);
     }
 
@@ -108,7 +116,7 @@ function getData() {
             UserBadgeActions.dataGetCompleted(result);
             return result;
         })
-        ['catch'](err => UserBadgeActions.dataGetFailed(err));
+        .catch(err => UserBadgeActions.dataGetFailed(err));
 }
 
 export {

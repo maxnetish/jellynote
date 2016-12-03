@@ -20,6 +20,10 @@ class UserBadge extends RefluxComponent {
         UserBadgeFlux.UserBadgeActions.componentMounted();
     }
 
+    componentWillUnmount() {
+        UserBadgeFlux.UserBadgeActions.componentUnmount();
+    }
+
     render() {
         console.info('Render UserBadge, state: ', this.state);
 
@@ -41,7 +45,7 @@ class UserBadge extends RefluxComponent {
                     </Button>
                 </div>
                 <LoginDialog isOpen={this.state.loginDialogVisible}
-                             onClose={UserBadgeFlux.UserBadgeActions.loginCancel}
+                             onCancel={UserBadgeFlux.UserBadgeActions.loginCancel}
                              onFullfill={UserBadgeFlux.UserBadgeActions.loginDialogFullfilled}/>
             </Card>,
             'UNKNOWN': <div></div>

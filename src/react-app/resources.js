@@ -1,4 +1,4 @@
-var cachedSessiongetPromise;
+var cachedSessiongetPromise = null;
 
 const HeadersAppJson = {
     'Content-Type': 'application/json; charset=utf-8'
@@ -8,16 +8,19 @@ const jsonSerialize = JSON.stringify;
 
 const session = {
     /**
+     * Clear cached context,
+     * context will refetch from server with next session.get()
+     */
+    clear: function () {
+        cachedSessiongetPromise = null;
+    },
+
+    /**
      * Cached request
      * @param query
      * @param pagination
      */
-    get: function sessionGet(force) {
-
-        if (force) {
-            cachedSessiongetPromise = null;
-        }
-
+    get: function sessionGet() {
         if (cachedSessiongetPromise) {
             return cachedSessiongetPromise;
         }
@@ -28,21 +31,19 @@ const session = {
             headers: {},
             credentials: 'include'
         })
-            .then(function (response) {
-                return response.json();
-            });
+            .then(response => response.json());
 
         return cachedSessiongetPromise;
     },
 
     postLogin: function postLogin(data) {
-        return fetch('api/session/login', {
+        return fetch('/api/session/login', {
             method: 'POST',
             body: jsonSerialize(data),
             headers: HeadersAppJson,
             credentials: 'include'
         })
-            .then(function (response) {
+            .then(response => {
                 if (response.status < 200 || response.status >= 300) {
                     throw `Login failed. Server says: ${response.status} ${response.statusText}.`;
                 }
@@ -51,13 +52,13 @@ const session = {
     },
 
     postLogout: function postLogout() {
-        return fetch('api/session/logout', {
+        return fetch('/api/session/logout', {
             method: 'POST',
             body: null,
             headers: HeadersAppJson,
             credentials: 'include'
         })
-            .then(function (response) {
+            .then(response => {
                 if (response.status < 200 || response.status >= 300) {
                     throw `Login failed. Server says: ${response.status} ${response.statusText}.`;
                 }
